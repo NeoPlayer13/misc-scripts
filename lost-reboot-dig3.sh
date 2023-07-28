@@ -1,11 +1,12 @@
 #!/bin/bash
 
-servers=("google.com" "yahoo.com" "facebook.com")
+servers=("google.com" "yahoo.com" "facebook.com") #Servers to query, change as needed.
 failed_count=0
-PING_IP_ADDRESS=192.168.1.1
+PING_IP_ADDRESS=x.x.x.x #Change IP as needed.
+DNS_IP=1.1.1.1 #Uses Cloudflare by default, change as needed.
 
 function check_server() {
-    if dig +short @1.1.1.1 "$1" >/dev/null; then
+    if dig +short @$DNS_IP "$1" >/dev/null; then
         echo "Server $1 is reachable."
         return 0
     else
