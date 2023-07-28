@@ -1,11 +1,14 @@
 #!/bin/bash
 
 # Replace 'IP_ADDRESS_TO_PING' with the actual IP address you want to ping
-IP_ADDRESS_TO_PING_1="192.168.1.133"
-IP_ADDRESS_TO_PING_2="1.1.1.1" #Modify later
+IP_ADDRESS_TO_PING_1="x.x.x.x"
+IP_ADDRESS_TO_PING_2="1.1.1.1"
 
 # Replace 'MAC_ADDRESS_TO_WOL' with the actual MAC address you want to send the>
-MAC_ADDRESS_TO_WOL="4C:CC:6A:0F:D2:38"
+MAC_ADDRESS_TO_WOL="xx:xx:xx:xx:xx:xx"
+
+# Replace 'NIC' with the network interface that you want to send the WOL packages with. 
+NIC="xxx"
 
 ping_successful() {
     echo "Both pings were successful"
@@ -13,7 +16,7 @@ ping_successful() {
 
 ping_failed() {
     echo "At least one ping failed. Sending WoL packet..."
-    sudo etherwake -i eth0 $MAC_ADDRESS_TO_WOL
+    sudo etherwake -i $NIC $MAC_ADDRESS_TO_WOL
 }
 
 while true; do
