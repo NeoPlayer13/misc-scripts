@@ -68,8 +68,8 @@ esac
 # Validates a given username against a regex to check if it meets the required criteria.
 validate_username() {
   local username=$1
-  
-  # Username regex - allows a-z, A-Z, 0-9, _, -, . 
+
+  # Username regex - allows a-z, A-Z, 0-9, _, -, .
   # and minimum length of 4 characters
   if [[ $username =~ ^[a-zA-Z0-9_-.]{4,}$ ]]; then
     return 0
@@ -82,7 +82,7 @@ validate_username() {
 validate_password() {
   local password=$1
 
-  # Password regex - allows a-z, A-Z, 0-9, _, -, . 
+  # Password regex - allows a-z, A-Z, 0-9, _, -, .
   # and minimum length of 8 characters
   if [[ $password =~ ^[a-zA-Z0-9_-.]{8,}$ ]]; then
     return 0
@@ -91,15 +91,16 @@ validate_password() {
   fi
 }
 
-# Validates the given username against the regex criteria 
+# Validates the given username against the regex criteria
 # and prompts the user to retry if invalid.
 # Loops continuously until a valid username is entered.
 user_loop() {
 while true; do
+  valid=$(validate_username "$username")
 
   read -r -p "Enter the username for the new user: " username
 
-  if validate_username "$username"; then
+  if [ "$valid" -eq 0 ]; then
     break
   else
     echo "Invalid username, please try again"
@@ -107,15 +108,16 @@ while true; do
 done
 }
 
-# password_loop prompts the user to enter a password and validates it against the 
-# validate_password function. It will continue prompting in a loop until a valid 
+# password_loop prompts the user to enter a password and validates it against the
+# validate_password function. It will continue prompting in a loop until a valid
 # password is entered.
 password_loop() {
 while true; do
+  valid=$(validate_pasword "$password")
 
   read -r -s -p "Enter the password for $username: " password
 
-  if validate_password "$password"; then
+  if [ "$valid" -eq 0 ]; then
     break
   else
     echo "Invalid password, please try again"
@@ -135,11 +137,11 @@ done
 hash()  {
   # Generate a 16 byte random salt
   salt=$(openssl rand -base64 16)
-  # Hash password with salt using bcrypt 
-  hashed_password=$(bcrypt "$password" "$salt" 12) 
-  # Save salt and hashed password 
+  # Hash password with salt using bcrypt
+  hashed_password=$(bcrypt "$password" "$salt" 12)
+  # Save salt and hashed password
   echo "$salt" >> salts.txt
-  echo "$hashed_password" >> passwords.txt 
+  echo "$hashed_password" >> passwords.txt
 }
 
 #############################
@@ -150,8 +152,8 @@ hash()  {
 create_debian_user() {
   # Prompt for the username and password. Validate username and password.
   user_loop
-  password_loop  
-  
+  password_loop
+
   # Create the user with adduser and set the password
   adduser "$username"
   echo "$username:$password" | chpasswd
@@ -165,7 +167,7 @@ create_debian_user() {
 create_fedora_user() {
   # Prompt for the username and password
   user_loop
-  password_loop  
+  password_loop
 
   # Create the user with useradd and set the password
   useradd "$username"
@@ -180,7 +182,7 @@ create_fedora_user() {
 create_arch_user() {
   # Prompt for the username and password
   user_loop
-  password_loop  
+  password_loop
 
   # Create the user with useradd and set the password
   useradd -m "$username"
