@@ -96,11 +96,12 @@ validate_password() {
 # Loops continuously until a valid username is entered.
 user_loop() {
   local username
-
+  
 while true; do
   read -r -p "Enter the username for the new user: " username
   
   if validate_username "$username"; then
+    echo "$username"
     break
   else
     echo "Invalid username, please try again"
@@ -118,6 +119,7 @@ while true; do
   read -r -s -p "Enter the password for $username: " password
 
   if validate_password "$password"; then
+    echo "$password"
     break
   else
     echo "Invalid password, please try again"
@@ -147,12 +149,11 @@ hash()  {
 #############################
 # End of Encryption Section #
 #############################
-
 # Function to create a user on a Debian-based system
 create_debian_user() {
   # Prompt for the username and password. Validate username and password.
-  user_loop
-  password_loop
+  username=$(user_loop)
+  password=$(password_loop)
 
   # Create the user with adduser and set the password
   adduser "$username"
@@ -166,8 +167,8 @@ create_debian_user() {
 # Function to create a user on a Fedora-based system
 create_fedora_user() {
   # Prompt for the username and password
-  user_loop
-  password_loop
+  username=$(user_loop)
+  password=$(password_loop)
 
   # Create the user with useradd and set the password
   useradd "$username"
@@ -181,8 +182,8 @@ create_fedora_user() {
 # Function to create a user on an Arch-based system
 create_arch_user() {
   # Prompt for the username and password
-  user_loop
-  password_loop
+  username=$(user_loop)
+  password=$(password_loop)
 
   # Create the user with useradd and set the password
   useradd -m "$username"
