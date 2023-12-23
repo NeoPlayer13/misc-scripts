@@ -71,7 +71,7 @@ validate_username() {
 
   # Username regex - allows a-z, A-Z, 0-9, _, -, .
   # and minimum length of 4 characters
-  if [[ $username =~ ^[a-zA-Z0-9_-.]{4,}$ ]]; then
+  if [[ $username =~ ^[a-zA-Z0-9_.]{4,}+$ ]]; then
     return 0
   else
     return 1
@@ -84,7 +84,7 @@ validate_password() {
 
   # Password regex - allows a-z, A-Z, 0-9, _, -, .
   # and minimum length of 8 characters
-  if [[ $password =~ ^[a-zA-Z0-9_-.]{8,}$ ]]; then
+  if [[ $password =~ ^[[:print:]]{8,}+$ ]]; then
     return 0
   else
     return 1
@@ -95,12 +95,12 @@ validate_password() {
 # and prompts the user to retry if invalid.
 # Loops continuously until a valid username is entered.
 user_loop() {
+  local username
+
 while true; do
-  valid=$(validate_username "$username")
-
   read -r -p "Enter the username for the new user: " username
-
-  if [ "$valid" -eq 0 ]; then
+  
+  if validate_username "$username"; then
     break
   else
     echo "Invalid username, please try again"
@@ -112,12 +112,12 @@ done
 # validate_password function. It will continue prompting in a loop until a valid
 # password is entered.
 password_loop() {
-while true; do
-  valid=$(validate_pasword "$password")
+  local password
 
+while true; do
   read -r -s -p "Enter the password for $username: " password
 
-  if [ "$valid" -eq 0 ]; then
+  if validate_password "$password"; then
     break
   else
     echo "Invalid password, please try again"
