@@ -8,9 +8,9 @@ detect_distribution() {
     release=$(lsb_release -sr)
     echo "Detected Linux Distribution: $distribution $release"
   elif [ -f /etc/os-release ]; then
-    shellcheck source=/etc/os-release
-    distribution="$NAME"
-    echo "Detected Linux Distribution: $NAME $VERSION"
+    distribution=$(cat /etc/os-release | grep ^NAME= | cut -d= -f2 | tr -d '"')
+    release=$(cat /etc/os-release | grep VERSION_ID | cut -d'=' -f2 | tr -d '"')
+    echo "Detected Linux Distribution: $distribution $release"
   else
     echo "Unable to detect the Linux distribution."
   fi
@@ -51,7 +51,7 @@ case "$distribution" in
   "Ubuntu" | "Debian")
     update_debian_system
     ;;
-  "Fedora" | "CentOS Stream")
+  "Fedora" | "CentOS Stream" | "Fedora Linux")
     update_fedora_system
     ;;
   "Arch Linux")
@@ -136,7 +136,7 @@ done
 
 # hash generates a salt, hashes the password with bcrypt using the salt, 
 # and saves the salt and hashed password to files
-hash()  {
+hash() {
   # Generate a 16 byte random salt
   salt=$(openssl rand -base64 16)
   # Hash password with salt using bcrypt
@@ -149,6 +149,25 @@ hash()  {
 #############################
 # End of Encryption Section #
 #############################
+
+user_creation() {
+  # Run the correct user creation function based on the detected distribution
+  case "$distribution" in
+    "Ubuntu" | "Debian")
+      create_debian_user
+      ;;
+  "Fedora" | "CentOS Stream" | "Fedora Linux")
+      create_fedora_user
+      ;;
+    "Arch Linux")
+      create_arch_user
+      ;;
+    *)
+      echo "System update not supported for this distribution."
+      ;;
+  esac
+}
+
 # Function to create a user on a Debian-based system
 create_debian_user() {
   # Prompt for the username and password. Validate username and password.
@@ -263,27 +282,23 @@ import_ssh_url() {
 
 # Prompt the user to select one or more actions
 echo "Choose one or more actions:"
-echo "1. Create a user for an Ubuntu/Debian System"
-echo "2. Create a user for a Fedora System"
-echo "3. Create a user for an Arch System"
-echo "4. Create an SSH key"
-echo "5. Change User"
-echo "6. Import a public SSH key via scp"
-echo "7. Import public SSH key from URL"
-echo "*IMPORTANT: for option 4 6 and 7 if needed change the user first, because it creates the SSH
+echo "1. Create new user"
+echo "2. Create an SSH key"
+echo "3. Change User"
+echo "4. Import a public SSH key via scp"
+echo "5. Import public SSH key from URL"
+echo "*IMPORTANT: for option 2 4 and 5 if needed change the user first, because it creates the SSH
       keys in the user folder that runs the script"
-read -r -p "Enter your choice(s) (e.g., 1 2 3 4 5 6 7): " choices
+read -r -p "Enter your choice(s) (e.g., 1 2 3 4 5): " choices
 
 # Execute the selected action(s)
 for choice in $choices; do
   case $choice in
-    1) create_debian_user ;;
-    2) create_fedora_user ;;
-    3) create_arch_user ;;
-    4) create_ssh_key ;;
-    5) change_user ;;
-    6) import_ssh_key ;;
-    7) import_ssh_url ;;
+    1) user_creation ;;
+    2) create_ssh_key ;;
+    3) change_user ;;
+    4) import_ssh_key ;;
+    5) import_ssh_url ;;
     *) echo "Invalid choice: $choice";;
   esac
 done
