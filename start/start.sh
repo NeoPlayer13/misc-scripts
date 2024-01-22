@@ -51,7 +51,7 @@ case "$distribution" in
   "Ubuntu" | "Debian")
     update_debian_system
     ;;
-  "Fedora" | "CentOS Stream" | "Fedora Linux")
+  "Fedora" | "CentOS Stream" | "Fedora Linux" | "Rocky Linux")
     update_fedora_system
     ;;
   "Arch Linux")
@@ -156,7 +156,7 @@ user_creation() {
     "Ubuntu" | "Debian")
       create_debian_user
       ;;
-  "Fedora" | "CentOS Stream" | "Fedora Linux")
+  "Fedora" | "CentOS Stream" | "Fedora Linux" | "Rocky Linux")
       create_fedora_user
       ;;
     "Arch Linux")
