@@ -3,18 +3,42 @@
 # Detects the Linux distribution by checking lsb_release, /etc/os-release, and falling back to unable to detect.
 # Sets the distribution and release variables.
 detect_distribution() {
-  if [ -x "$(command -v lsb_release)" ]; then
-    distribution=$(lsb_release -si)
-    release=$(lsb_release -sr)
-    echo "Detected Linux Distribution: $distribution $release"
-  elif [ -f /etc/os-release ]; then
-    distribution=$(cat /etc/os-release | grep ^NAME= | cut -d= -f2 | tr -d '"')
-    release=$(cat /etc/os-release | grep VERSION_ID | cut -d'=' -f2 | tr -d '"')
-    echo "Detected Linux Distribution: $distribution $release"
+  if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    distro="$ID"
+    ver="$VERSION_ID"
+  elif [ -x "$(command -v lsb_release)" ]; then
+    distro=$(lsb_release -si) 
+    ver=$(lsb_release -sr)
   else
-    echo "Unable to detect the Linux distribution."
+    distro=""
+    ver=""
   fi
+
+  # Capitalize first letter of distro for consistency with lsb_release output
+  distro=$(echo "$distro" | cut -c1 | tr '[a-z]' '[A-Z]')${distro:1}
+
+  echo "Detected distro: $distro version $ver"
 }
+
+# Detect the Linux distribution
+detect_distribution
+
+# Update the system based on the detected distribution
+case "$distro" in
+  "Ubuntu" | "Debian")
+    update_debian_system
+    ;;
+  "Fedora" | "CentOS Stream" | "Fedora Linux" | "Rocky Linux" | "AlmaLinux")
+    update_fedora_system
+    ;;
+  "Arch Linux")
+    update_arch_system
+    ;;
+  *)
+    echo "System update not supported for this distribution."
+    ;;
+esac
 
 # Function to update a Debian-based system
 update_debian_system() {
@@ -42,25 +66,6 @@ if [ "$EUID" -ne 0 ]; then
   echo "Please run this script as root or using sudo."
   exit 1
 fi
-
-# Detect the Linux distribution
-detect_distribution
-
-# Update the system based on the detected distribution
-case "$distribution" in
-  "Ubuntu" | "Debian")
-    update_debian_system
-    ;;
-  "Fedora" | "CentOS Stream" | "Fedora Linux" | "Rocky Linux")
-    update_fedora_system
-    ;;
-  "Arch Linux")
-    update_arch_system
-    ;;
-  *)
-    echo "System update not supported for this distribution."
-    ;;
-esac
 
 ######################
 # Validation Section #
@@ -152,11 +157,11 @@ hash() {
 
 user_creation() {
   # Run the correct user creation function based on the detected distribution
-  case "$distribution" in
+  case "$distro" in
     "Ubuntu" | "Debian")
       create_debian_user
       ;;
-  "Fedora" | "CentOS Stream" | "Fedora Linux" | "Rocky Linux")
+  "Fedora" | "CentOS Stream" | "Fedora Linux" | "Rocky Linux" | "AlmaLinux")
       create_fedora_user
       ;;
     "Arch Linux")
